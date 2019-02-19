@@ -10,7 +10,7 @@ jobs: # basic units of work in a run
 #        POSTGRES_USER: circleci-demo-go
 #        POSTGRES_DB: circle_test
     # directory where steps are run. Path must conform to the Go Workspace requirements
-    working_directory: /go/src/github.com/cakesmith/go-websocket-chat-demo
+   working_directory: /go/src/github.com/cakesmith/go-websocket-chat-demo
 
 #    environment: # environment variables for the build itself
 #      TEST_RESULTS: /tmp/test-results # path to where test results will be saved
@@ -54,7 +54,7 @@ jobs: # basic units of work in a run
         #          trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
         #          make test | tee ${TEST_RESULTS}/go-test.out
 
-         command: go test ./...
+        command: go test ./...
 #
 #    - run: make # pull and build dependencies for the project
 #
