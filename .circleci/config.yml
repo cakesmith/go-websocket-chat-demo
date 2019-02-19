@@ -2,14 +2,16 @@ version: 2 # use CircleCI 2.0
 jobs: # basic units of work in a run
   build: # runs not using Workflows must have a `build` job as entry point
     docker: # run the steps with Docker
-    - image: circleci/golang:1.8 
+    - image: circleci/golang:1.8
       working_directory: /go/src/github.com/cakesmith/go-websocket-chat-demo
     steps: # steps that comprise the `build` job
     - checkout # check out source code to working directory
     - restore_cache: # restores saved cache if no changes are detected since last run
         keys:
         - v1-pkg-cache
-    - run: go get ./...
+    - run:
+        name: Fetch Dependencies
+        command: go get -u ./...
     - run:
         name: Run unit tests
         command: go test ./...
