@@ -9,9 +9,9 @@ jobs: # basic units of work in a run
     - restore_cache: # restores saved cache if no changes are detected since last run
         keys:
         - v1-pkg-cache
-    - run:
-        name: Fetch Dependencies
-        command: go get -u ./...
+#    - run:
+#        name: Fetch Dependencies
+#        command: go get -u ./...
     - run:
         name: Run unit tests
         command: go test ./...
