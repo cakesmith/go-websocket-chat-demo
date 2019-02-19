@@ -85,7 +85,7 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 		//mt, data, err := ws.ReadMessage()
 		l := log.WithFields(logrus.Fields{"mt": mt, "err": err})
 		if err != nil {
-			if websocket.IsCloseError(err, websocket.CloseGoingAway) || err == io.EOF {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) || err == io.EOF {
 				l.Info("Websocket closed!")
 				break
 			}
