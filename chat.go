@@ -89,7 +89,7 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 				l.Info("Websocket closed!")
 				break
 			}
-			l.Error("Error reading websocket message")
+			l.Error(errors.Wrap(err, "Error reading websocket message"))
 		}
 
 		switch mt {
