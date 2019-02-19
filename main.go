@@ -22,9 +22,9 @@ func main() {
 		log.WithField("PORT", port).Fatal("$PORT must be set")
 	}
 
-	redisURL := os.Getenv("REDIS_URL")
+	redisURL := os.Getenv("REDISTOGO_URL")
 	if redisURL == "" {
-		log.WithField("REDIS_URL", redisURL).Fatal("$REDIS_URL must be set")
+		log.WithField("REDISTOGO_URL", redisURL).Fatal("$REDISTOGO_URL must be set")
 	}
 	redisPool, err := redis.NewRedisPoolFromURL(redisURL)
 	if err != nil {
