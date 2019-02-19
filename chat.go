@@ -3,11 +3,27 @@ package main
 import (
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
+)
+
+const (
+	// Time allowed to write a message to the peer.
+	writeWait = 10 * time.Second
+
+	// Time allowed to read the next pong message from the peer.
+	pongWait = 60 * time.Second
+
+	// Send pings to peer with this period. Must be less than pongWait.
+	pingPeriod = (pongWait * 9) / 10
+
+	// Maximum message size allowed from peer.
+	maxMessageSize = 512
 )
 
 var (
@@ -56,9 +72,18 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 
 	rr.register(ws)
 
+	defer rr.deRegister(ws)
+	defer ws.WriteMessage(websocket.CloseMessage, []byte{})
+	defer ws.Close()
+
+	ws.SetReadLimit(maxMessageSize)
+	ws.SetReadDeadline(time.Now().Add(pongWait))
+	ws.SetPongHandler(func(string) error { ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+
 	for {
-		mt, data, err := ws.ReadMessage()
-		l := log.WithFields(logrus.Fields{"mt": mt, "data": data, "err": err})
+		mt, reader, err := ws.NextReader()
+		//mt, data, err := ws.ReadMessage()
+		l := log.WithFields(logrus.Fields{"mt": mt, "err": err})
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseGoingAway) || err == io.EOF {
 				l.Info("Websocket closed!")
@@ -66,20 +91,24 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 			}
 			l.Error("Error reading websocket message")
 		}
+
 		switch mt {
 		case websocket.TextMessage:
-			msg, err := validateMessage(data)
+			message, err := ioutil.ReadAll(reader)
+			if err != nil {
+				l.WithFields(logrus.Fields{"message": message, "err": err}).Error("Error reading message")
+				break
+			}
+			msg, err := validateMessage(message)
 			if err != nil {
 				l.WithFields(logrus.Fields{"msg": msg, "err": err}).Error("Invalid Message")
 				break
 			}
-			rw.publish(data)
+			rw.publish(message)
 		default:
 			l.Warning("Unknown Message!")
 		}
 	}
 
-	rr.deRegister(ws)
 
-	ws.WriteMessage(websocket.CloseMessage, []byte{})
 }
