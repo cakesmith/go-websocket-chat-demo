@@ -105,6 +105,8 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			rw.publish(message)
+		case websocket.PingMessage:
+			l.Info("Ping received")
 		default:
 			l.Warning("Unknown Message!")
 		}
